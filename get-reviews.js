@@ -1,5 +1,5 @@
-const TOKEN = "nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d";
-const SITE_ID = "7d562fa3-758c-4b06-a91f-c93ac9c751f5";
+const TOKEN = process.env.NETLIFY_TOKEN;
+const SITE_ID = process.env.NETLIFY_SITE_ID;
 
 exports.handler = async function(event, context) {
   try {
