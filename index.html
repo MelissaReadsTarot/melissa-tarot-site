@@ -804,20 +804,12 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
   function loadReviews() {
     var grid = document.getElementById('live-reviews-grid');
     if (!grid) return;
-    fetch('/api/reviews')
+    fetch('/.netlify/functions/get-reviews')
       .then(function(r) { return r.json(); })
-      .then(function(forms) {
-        var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
-        if (!form) return;
-        return fetch('/api/submissions/' + form.id);
-      })
-      .then(function(r) { if (r) return r.json(); })
-      .then(function(subs) {
-        if (!Array.isArray(subs) || !subs.length) return;
-        var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
-        if (!valid.length) return;
-        grid.innerHTML = valid.map(function(s) {
-          var d = s.data;
+      .then(function(reviews) {
+        if (!Array.isArray(reviews) || !reviews.length) return;
+        grid.innerHTML = reviews.map(function(s) {
+          var d = s;
           return '<div class="testimonial" style="opacity:1;transform:none;">' +
             '<p class="testimonial-text">' + d.review + '</p>' +
             '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
