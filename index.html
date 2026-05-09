@@ -341,7 +341,7 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
   </div>
 
   <script>
-  const REVIEWS_URL = "/.netlify/functions/get-reviews";
+  const REVIEWS_URL = "https://script.google.com/macros/s/AKfycbxDOlSlApb7J5CtMdMPVhZvs6ODY6Adqegc67ghcLBwUMPOLV2nUElqTgunLKI8fjHb/exec";
 
   // Load live reviews using JSONP to bypass CORS
   function loadLiveReviews() {
@@ -800,5 +800,42 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 
 
+
+<script>
+(function() {
+  function loadReviews() {
+    var grid = document.getElementById('live-reviews-grid');
+    if (!grid) return;
+    // First get the form ID
+    fetch('https://api.netlify.com/api/v1/sites/7d562fa3-758c-4b06-a91f-c93ac9c751f5/forms', {
+      headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(forms) {
+      var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
+      if (!form) return;
+      return fetch('https://api.netlify.com/api/v1/forms/' + form.id + '/submissions', {
+        headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
+      });
+    })
+    .then(function(r) { if (r) return r.json(); })
+    .then(function(subs) {
+      if (!Array.isArray(subs) || !subs.length) return;
+      var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
+      if (!valid.length) return;
+      grid.innerHTML = valid.map(function(s) {
+        var d = s.data;
+        return '<div class="testimonial" style="opacity:1;transform:none;">' +
+          '<p class="testimonial-text">' + d.review + '</p>' +
+          '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
+          (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
+          '</div>';
+      }).join('');
+    })
+    .catch(function(e) { console.log('Reviews error:', e); });
+  }
+  window.addEventListener('load', loadReviews);
+})();
+</script>
 </body>
 </html>
