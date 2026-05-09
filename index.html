@@ -808,7 +808,7 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
       .then(function(r) { return r.json(); })
       .then(function(reviews) {
         if (!Array.isArray(reviews) || !reviews.length) return;
-        grid.innerHTML = reviews.slice().reverse().map(function(s) {
+       grid.innerHTML = reviews.slice().reverse().map(function(s) {
           var d = s;
           return '<div class="testimonial" style="opacity:1;transform:none;">' +
             '<p class="testimonial-text">' + d.review + '</p>' +
