@@ -232,6 +232,18 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
   </div>
 </section>
 
+<!-- ABOUT -->
+<section class="section" id="about" style="background:rgba(200,146,74,0.04);border-top:1px solid rgba(200,146,74,0.15);border-bottom:1px solid rgba(200,146,74,0.15);">
+  <div style="max-width:820px;margin:0 auto;text-align:center;">
+    <span class="section-label">Who I Am</span>
+    <h2 class="section-title">About Melissa</h2>
+    <div style="width:60px;height:2px;background:var(--gold);margin:24px auto 36px;"></div>
+    <p style="font-size:1.12rem;line-height:1.9;color:rgba(245,237,216,0.78);font-family:Georgia,serif;font-style:italic;margin-bottom:24px;">I came to tarot in 2016 during a hard season of my life. What started as simply something new to learn ended up becoming one of the most powerful tools for healing and clarity I've ever found.</p>
+    <p style="font-size:1.12rem;line-height:1.9;color:rgba(245,237,216,0.78);font-family:Georgia,serif;font-style:italic;margin-bottom:24px;">My approach is anything but traditional. I don't work from fixed spreads — instead, I do free pulls and let spirit paint the picture. I think of the cards like pages in a book. The more cards laid down, the more pages, the more chapters of your story revealed.</p>
+    <p style="font-size:1.12rem;line-height:1.9;color:rgba(245,237,216,0.78);font-family:Georgia,serif;font-style:italic;">Whether you're navigating love, searching for direction, or simply seeking a deeper understanding of where you are — I'm here to help you read your story.</p>
+  </div>
+</section>
+
 <!-- SERVICES -->
 <section class="section" id="services" style="text-align:center;">
   <span class="section-label">What I Offer</span>
@@ -337,7 +349,7 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
       <button type="submit" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;">Submit Review</button>
     </form>
     <p style="text-align:center;margin-top:14px;font-size:0.88rem;color:rgba(245,237,216,0.4);font-style:italic;">Thank you for sharing your experience! 🔮</p>
-    <p style="text-align:center;margin-top:14px;font-size:0.88rem;color:rgba(245,237,216,0.4);font-style:italic;">Thank you for sharing your experience! 🔮</p>
+    
   </div>
 
   <script>
@@ -800,5 +812,42 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 
 
+
+<script>
+(function() {
+  function loadReviews() {
+    var grid = document.getElementById('live-reviews-grid');
+    if (!grid) return;
+    // First get the form ID
+    fetch('https://api.netlify.com/api/v1/sites/7d562fa3-758c-4b06-a91f-c93ac9c751f5/forms', {
+      headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(forms) {
+      var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
+      if (!form) return;
+      return fetch('https://api.netlify.com/api/v1/forms/' + form.id + '/submissions', {
+        headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
+      });
+    })
+    .then(function(r) { if (r) return r.json(); })
+    .then(function(subs) {
+      if (!Array.isArray(subs) || !subs.length) return;
+      var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
+      if (!valid.length) return;
+      grid.innerHTML = valid.map(function(s) {
+        var d = s.data;
+        return '<div class="testimonial" style="opacity:1;transform:none;">' +
+          '<p class="testimonial-text">' + d.review + '</p>' +
+          '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
+          (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
+          '</div>';
+      }).join('');
+    })
+    .catch(function(e) { console.log('Reviews error:', e); });
+  }
+  window.addEventListener('load', loadReviews);
+})();
+</script>
 </body>
 </html>
