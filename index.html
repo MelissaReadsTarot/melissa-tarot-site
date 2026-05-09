@@ -835,7 +835,7 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
       if (!Array.isArray(subs) || !subs.length) return;
       var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
       if (!valid.length) return;
-      grid.innerHTML = valid.map(function(s) {
+      var newHTML = valid.map(function(s) {
         var d = s.data;
         return '<div class="testimonial" style="opacity:1;transform:none;">' +
           '<p class="testimonial-text">' + d.review + '</p>' +
@@ -843,6 +843,7 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
           (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
           '</div>';
       }).join('');
+      grid.innerHTML = newHTML;
     })
     .catch(function(e) { console.log('Reviews error:', e); });
   }
