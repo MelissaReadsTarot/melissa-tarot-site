@@ -353,84 +353,54 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
   </div>
 
   <script>
-  const REVIEWS_URL = "https://script.google.com/macros/s/AKfycbxDOlSlApb7J5CtMdMPVhZvs6ODY6Adqegc67ghcLBwUMPOLV2nUElqTgunLKI8fjHb/exec";
-
-  // Load live reviews using JSONP to bypass CORS
+  // Load live reviews from Netlify via serverless function (token stays server-side)
   function loadLiveReviews() {
-    window.handleReviews = function(reviews) {
-      const grid = document.getElementById('live-reviews-grid');
-      if (!grid) return;
-      const valid = Array.isArray(reviews) ? reviews.filter(r => r && r.review && r.review.trim() && r.name && r.name.trim()) : [];
-      if (!valid.length) { grid.innerHTML = ''; return; }
-      grid.innerHTML = valid.map(r => `
-        <div class="testimonial" style="opacity:1;transform:none;border:1px solid rgba(200,146,74,0.18);padding:38px 30px;background:rgba(200,146,74,0.03);position:relative;">
-          <p class="testimonial-text" style="font-style:italic;font-size:1.05rem;line-height:1.82;color:rgba(245,237,216,0.75);margin-bottom:18px;padding-top:20px;">${r.review}</p>
-          <span class="testimonial-author" style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.15em;color:var(--gold-light);text-transform:uppercase;">— ${r.name}${r.service ? ' · ' + r.service : ''}</span>
-          ${r.rating ? `<span style="display:block;font-size:0.85rem;color:var(--gold);margin-top:6px;">${r.rating}</span>` : ''}
-        </div>
-      `).join('');
-    };
-    // Remove any existing JSONP script
-    const existing = document.getElementById('jsonp-reviews');
-    if (existing) existing.remove();
-    const script = document.createElement('script');
-    script.id = 'jsonp-reviews';
-    script.src = REVIEWS_URL + '?callback=handleReviews&t=' + Date.now();
-    document.body.appendChild(script);
-  }
-
-  // Submit review
-  async function submitReview() {
-    const name    = document.getElementById('rv-name').value.trim();
-    const rating  = document.getElementById('rv-rating').value;
-    const service = document.getElementById('rv-service').value;
-    const review  = document.getElementById('rv-text').value.trim();
-    const msg     = document.getElementById('rv-msg');
-
-    if (!name || !rating || !service || !review) {
-      msg.style.display = 'block';
-      msg.style.color = 'var(--gold-light)';
-      msg.textContent = 'Please fill in all fields before submitting.';
-      return;
-    }
-
-    msg.style.display = 'block';
-    msg.style.color = 'rgba(245,237,216,0.6)';
-    msg.textContent = 'Submitting...';
-
-    try {
-      await fetch(REVIEWS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ name, rating, service, review }),
-      });
-      msg.style.color = 'var(--gold-light)';
-      msg.textContent = '✦ Thank you! Your review has been posted. 🔮';
-      document.getElementById('rv-name').value = '';
-      document.getElementById('rv-rating').value = '';
-      document.getElementById('rv-service').value = '';
-      document.getElementById('rv-text').value = '';
-      setTimeout(loadLiveReviews, 1500);
-    } catch(e) {
-      msg.style.color = 'var(--gold-light)';
-      msg.textContent = 'Something went wrong. Please try again.';
-    }
-  }
-
-  window.handleReviews = function(reviews) {
     var grid = document.getElementById('live-reviews-grid');
-    if (!grid || !Array.isArray(reviews) || !reviews.length) return;
-    var valid = reviews.filter(function(r) { return r && r.review && r.name; });
-    if (!valid.length) return;
-    grid.innerHTML = valid.map(function(r) {
-      return '<div class="testimonial" style="opacity:1;transform:none;">' +
-        '<p class="testimonial-text">' + r.review + '</p>' +
-        '<span class="testimonial-author">— ' + r.name + (r.service ? ' · ' + r.service : '') + '</span>' +
-        (r.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + r.rating + '</span>' : '') +
-        '</div>';
-    }).join('');
-  };
-  document.addEventListener("DOMContentLoaded", function() { setTimeout(loadLiveReviews, 800); });
+    if (!grid) return;
+    fetch('/.netlify/functions/get-reviews')
+      .then(function(r) { return r.json(); })
+      .then(function(reviews) {
+        if (!Array.isArray(reviews) || !reviews.length) return;
+        grid.innerHTML = reviews.map(function(r) {
+          return '<div class="testimonial" style="opacity:1;transform:none;">' +
+            '<p class="testimonial-text">' + escapeHtml(r.review) + '</p>' +
+            '<span class="testimonial-author">— ' + escapeHtml(r.name) + (r.service ? ' · ' + escapeHtml(r.service) : '') + '</span>' +
+            (r.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + escapeHtml(r.rating) + '</span>' : '') +
+            '</div>';
+        }).join('');
+      })
+      .catch(function(e) { console.log('Reviews load error:', e); });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // After Netlify form submits, intercept to show a thank-you without page reload
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form[name="reviews"]');
+    if (!form) return;
+
+    // Load existing reviews on page load
+    loadLiveReviews();
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var data = new FormData(form);
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function() {
+        // Show thank-you message
+        form.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Thank you! Your review has been received. 🔮</p>';
+        // Reload live reviews after a short delay
+        setTimeout(loadLiveReviews, 2000);
+      })
+      .catch(function() {
+        alert('Something went wrong. Please try again.');
+      });
+    });
+  });
   </script>
 
 
@@ -714,7 +684,7 @@ const COUNTER_BASE = 17333;
 
 async function loadCounter() {
   try {
-    const res = await fetch(`https://api.countapi.xyz/get/${COUNTER_NS}/${COUNTER_KEY}`);
+    const res = await fetch(`https://abacus.jasoncameron.dev/get/${COUNTER_NS}/${COUNTER_KEY}`);
     const data = await res.json();
     const count = COUNTER_BASE + (data.value || 0);
     animateCounter(count);
@@ -725,7 +695,7 @@ async function loadCounter() {
 
 async function incrementCounter() {
   try {
-    const res = await fetch(`https://api.countapi.xyz/hit/${COUNTER_NS}/${COUNTER_KEY}`);
+    const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNTER_NS}/${COUNTER_KEY}`);
     const data = await res.json();
     const count = COUNTER_BASE + (data.value || 0);
     animateCounter(count);
@@ -813,42 +783,6 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 
 
-<script>
-(function() {
-  function loadReviews() {
-    var grid = document.getElementById('live-reviews-grid');
-    if (!grid) return;
-    // First get the form ID
-    fetch('https://api.netlify.com/api/v1/sites/7d562fa3-758c-4b06-a91f-c93ac9c751f5/forms', {
-      headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(forms) {
-      var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
-      if (!form) return;
-      return fetch('https://api.netlify.com/api/v1/forms/' + form.id + '/submissions', {
-        headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
-      });
-    })
-    .then(function(r) { if (r) return r.json(); })
-    .then(function(subs) {
-      if (!Array.isArray(subs) || !subs.length) return;
-      var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
-      if (!valid.length) return;
-      var newHTML = valid.map(function(s) {
-        var d = s.data;
-        return '<div class="testimonial" style="opacity:1;transform:none;">' +
-          '<p class="testimonial-text">' + d.review + '</p>' +
-          '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
-          (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
-          '</div>';
-      }).join('');
-      grid.innerHTML = newHTML;
-    })
-    .catch(function(e) { console.log('Reviews error:', e); });
-  }
-  window.addEventListener('load', loadReviews);
-})();
-</script>
+
 </body>
 </html>
