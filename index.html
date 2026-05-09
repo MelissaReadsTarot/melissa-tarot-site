@@ -466,8 +466,6 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
 
 
-    <div class="testimonial reveal"><p class="testimonial-text">Melissa has been on point for my readings constantly — it's like she really knows me and my life. That's how I know she's the real deal. She's kind and helpful. You won't regret trusting her. This is coming from a guy with serious trust issues but I trust Melissa with no doubts!</p><span class="testimonial-author">— John · 1 Question Reading</span></div>
-    <div class="testimonial reveal"><p class="testimonial-text">Goes above and beyond to get your questions answered. Very genuine and on point. Have had several readings. Love her energy.</p><span class="testimonial-author">— Amy · TikTok Live Reading</span></div>
   <!-- LIVE REVIEWS GRID -->
   <div id="live-reviews-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:20px;margin-bottom:20px;"></div>
 
@@ -806,33 +804,28 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
   function loadReviews() {
     var grid = document.getElementById('live-reviews-grid');
     if (!grid) return;
-    // First get the form ID
-    fetch('https://api.netlify.com/api/v1/sites/7d562fa3-758c-4b06-a91f-c93ac9c751f5/forms', {
-      headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(forms) {
-      var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
-      if (!form) return;
-      return fetch('https://api.netlify.com/api/v1/forms/' + form.id + '/submissions', {
-        headers: { 'Authorization': 'Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d' }
-      });
-    })
-    .then(function(r) { if (r) return r.json(); })
-    .then(function(subs) {
-      if (!Array.isArray(subs) || !subs.length) return;
-      var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
-      if (!valid.length) return;
-      grid.innerHTML = valid.map(function(s) {
-        var d = s.data;
-        return '<div class="testimonial" style="opacity:1;transform:none;">' +
-          '<p class="testimonial-text">' + d.review + '</p>' +
-          '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
-          (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
-          '</div>';
-      }).join('');
-    })
-    .catch(function(e) { console.log('Reviews error:', e); });
+    fetch('/api/reviews')
+      .then(function(r) { return r.json(); })
+      .then(function(forms) {
+        var form = Array.isArray(forms) && forms.find(function(f) { return f.name === 'reviews'; });
+        if (!form) return;
+        return fetch('/api/submissions/' + form.id);
+      })
+      .then(function(r) { if (r) return r.json(); })
+      .then(function(subs) {
+        if (!Array.isArray(subs) || !subs.length) return;
+        var valid = subs.filter(function(s) { return s.data && s.data.review && s.data.name; });
+        if (!valid.length) return;
+        grid.innerHTML = valid.map(function(s) {
+          var d = s.data;
+          return '<div class="testimonial" style="opacity:1;transform:none;">' +
+            '<p class="testimonial-text">' + d.review + '</p>' +
+            '<span class="testimonial-author">— ' + d.name + (d.service ? ' · ' + d.service : '') + '</span>' +
+            (d.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + d.rating + '</span>' : '') +
+            '</div>';
+        }).join('');
+      })
+      .catch(function(e) { console.log('Reviews error:', e); });
   }
   window.addEventListener('load', loadReviews);
 })();
