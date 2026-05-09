@@ -1,0 +1,13 @@
+[[redirects]]
+  from = "/api/reviews"
+  to = "https://api.netlify.com/api/v1/sites/7d562fa3-758c-4b06-a91f-c93ac9c751f5/forms"
+  status = 200
+  force = true
+  headers = {Authorization = "Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d"}
+
+[[redirects]]
+  from = "/api/submissions/:formId"
+  to = "https://api.netlify.com/api/v1/forms/:formId/submissions"
+  status = 200
+  force = true
+  headers = {Authorization = "Bearer nfp_BfmVyYGG79An3Bv8X1S9tcYYEsWkVgMa753d"}
