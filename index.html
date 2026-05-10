@@ -748,14 +748,23 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 </div>
 
 <script>
-// PRIVATE READING FORM — populate hidden fields before submit
+// PRIVATE READING FORM — populate hidden fields then submit via fetch
 const readingForm = document.getElementById('reading-form');
 if (readingForm) {
   readingForm.addEventListener('submit', function(e) {
+    e.preventDefault();
     const summaryText = document.getElementById('reading-summary-text');
     if (summaryText) document.getElementById('r-reading-type').value = summaryText.textContent || '';
     const sos = document.getElementById('sos-checkbox');
     if (sos) document.getElementById('r-sos-hidden').value = sos.checked ? 'Yes — SOS Rush (+$20)' : 'No';
+    const data = new FormData(readingForm);
+    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(data).toString()
+    })
+    .then(function() {
+      readingForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">&#10022; Thank you! Your reading request has been received. &#128302;</p>';
+    })
+    .catch(function() { alert('Something went wrong. Please try again.'); });
   });
 }
 
