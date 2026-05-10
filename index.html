@@ -667,19 +667,30 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
     <div class="section-divider">
       <p class="section-divider-label">Your Reading Details</p>
-      <div class="form-field">
-        <label>Your Name</label>
-        <input type="text" id="r-name" placeholder="Your full name">
-      </div>
-      <div class="form-field">
-        <label>Your Question(s)</label>
-        <textarea id="r-question" rows="3" placeholder="What would you like guidance on? Be as specific as you like..."></textarea>
-      </div>
-      <div class="form-field">
-        <label>Name of Anyone Being Asked About <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
-        <input type="text" id="r-other" placeholder="e.g. partner, family member, friend...">
-      </div>
-      <p style="font-size:0.82rem;color:rgba(245,237,216,0.38);font-style:italic;margin-bottom:18px;">Please include your name and question in your payment note.</p>
+      <form name="private-reading" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="reading-form">
+        <input type="hidden" name="form-name" value="private-reading">
+        <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
+        <div class="form-field">
+          <label>Your Name</label>
+          <input type="text" id="r-name" name="name" placeholder="Your full name" required>
+        </div>
+        <div class="form-field">
+          <label>Your Email</label>
+          <input type="email" id="r-email" name="email" placeholder="So Melissa can send your reading" required>
+        </div>
+        <div class="form-field">
+          <label>Your Question(s)</label>
+          <textarea id="r-question" name="question" rows="3" placeholder="What would you like guidance on? Be as specific as you like..." required></textarea>
+        </div>
+        <div class="form-field">
+          <label>Name of Anyone Being Asked About <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
+          <input type="text" id="r-other" name="other-person" placeholder="e.g. partner, family member, friend...">
+        </div>
+        <input type="hidden" name="reading-type" id="r-reading-type" value="">
+        <input type="hidden" name="sos-rush" id="r-sos-hidden" value="No">
+        <p style="font-size:0.82rem;color:rgba(245,237,216,0.38);font-style:italic;margin-bottom:18px;">Please also include your name and question in your payment note.</p>
+        <button type="submit" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-bottom:18px;">Submit Reading Request</button>
+      </form>
     </div>
 
     <div class="section-divider">
@@ -697,6 +708,17 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 </div>
 
 <script>
+// PRIVATE READING FORM — populate hidden fields before submit
+const readingForm = document.getElementById('reading-form');
+if (readingForm) {
+  readingForm.addEventListener('submit', function(e) {
+    const summaryText = document.getElementById('reading-summary-text');
+    if (summaryText) document.getElementById('r-reading-type').value = summaryText.textContent || '';
+    const sos = document.getElementById('sos-checkbox');
+    if (sos) document.getElementById('r-sos-hidden').value = sos.checked ? 'Yes — SOS Rush (+$20)' : 'No';
+  });
+}
+
 // PURCHASE COUNTER
 const COUNTER_KEY = 'melissa-reads-tarot-checkout';
 const COUNTER_NS  = 'melissareadstarot';
