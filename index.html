@@ -393,6 +393,22 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
   // After Netlify form submits, intercept to show a thank-you without page reload
   document.addEventListener('DOMContentLoaded', function() {
+    // TT Live Reading form
+    var ttForm = document.getElementById('tt-love-form');
+    if (ttForm) {
+      ttForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var data = new FormData(ttForm);
+        fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data).toString()
+        })
+        .then(function() {
+          ttForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Thank you! Your reading request has been received. 🔮</p>';
+        })
+        .catch(function() { alert('Something went wrong. Please try again.'); });
+      });
+    }
+
     var form = document.querySelector('form[name="reviews"]');
     if (!form) return;
 
@@ -558,6 +574,28 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
       <a href="https://www.tiktok.com/@melissa_reads_tarot?_r=1&_t=ZT-96DSRbXXIZa" target="_blank" rel="noopener noreferrer" class="btn btn-filled" style="display:inline-block;border:none;">Follow on TikTok ↗</a>
     </div>
 
+    <div class="section-divider">
+      <p class="section-divider-label">Your Reading Details</p>
+      <form name="tt-live-reading" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="tt-love-form">
+        <input type="hidden" name="form-name" value="tt-live-reading">
+        <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
+        <div class="form-field">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="Your full name" required>
+        </div>
+        <div class="form-field">
+          <label>Your Question(s)</label>
+          <textarea name="question" rows="3" placeholder="What would you like guidance on during the live? Be as specific as you like..." required></textarea>
+        </div>
+        <div class="form-field">
+          <label>Person Being Asked About <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
+          <input type="text" name="other-person" placeholder="e.g. partner, family member, friend...">
+        </div>
+        <p style="font-size:0.82rem;color:rgba(245,237,216,0.38);font-style:italic;margin-bottom:18px;">Please also include your name and question in your payment note.</p>
+        <button type="submit" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-bottom:18px;">Submit Reading Request</button>
+      </form>
+    </div>
+
     <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;">Pay During Live</p>
     <div class="pay-grid">
       <a href="https://venmo.com/code?user_id=2082708108869632501&created=1777945804" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💙</span>Venmo</a>
@@ -569,6 +607,8 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
     <p class="pay-note">These prices are exclusive to live sessions and not available for pre-recorded or private readings.</p>
   </div>
 </div>
+
+
 
 <!-- MODAL: Classes -->
 <div class="modal-overlay" id="modal-classes">
