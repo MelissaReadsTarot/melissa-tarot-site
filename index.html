@@ -399,12 +399,11 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
       ttForm.addEventListener('submit', function(e) {
         e.preventDefault();
         var data = new FormData(ttForm);
-        fetch('https://api.web3forms.com/submit', { method: 'POST', body: data })
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-          if (res.success) {
-            ttForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Thank you! Your reading request has been received. 🔮</p>';
-          } else { alert('Something went wrong. Please try again.'); }
+        fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data).toString()
+        })
+        .then(function() {
+          ttForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Thank you! Your reading request has been received. 🔮</p>';
         })
         .catch(function() { alert('Something went wrong. Please try again.'); });
       });
@@ -876,6 +875,27 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 
 
+
+<!-- Hidden static forms for Netlify build-time detection -->
+<div style="display:none;">
+  <form name="tt-live-reading" netlify data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="tt-live-reading">
+    <input name="bot-field">
+    <input name="name">
+    <input name="question">
+    <input name="other-person">
+  </form>
+  <form name="private-reading" netlify data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="private-reading">
+    <input name="bot-field">
+    <input name="name">
+    <input name="email">
+    <input name="question">
+    <input name="other-person">
+    <input name="reading-type">
+    <input name="sos-rush">
+  </form>
+</div>
 
 </body>
 </html>
