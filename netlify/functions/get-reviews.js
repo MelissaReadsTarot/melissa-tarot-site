@@ -14,7 +14,13 @@ exports.handler = async function(event, context) {
     const submissions = await subsRes.json();
     const reviews = submissions
       .filter(s => s.data && s.data.review && s.data.name)
-      .map(s => ({ name: s.data.name, rating: s.data.rating||'', service: s.data.service||'', review: s.data.review }));
+      .map(s => ({
+        name: s.data.name,
+        rating: s.data.rating || '',
+        service: s.data.service || '',
+        review: s.data.review,
+        date: s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+      }));
     return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(reviews) };
   } catch(err) {
     return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: '[]' };
