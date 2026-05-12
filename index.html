@@ -326,6 +326,7 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
     <form name="reviews" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="background:rgba(200,146,74,0.05);border:1px solid rgba(200,146,74,0.25);padding:36px 32px;">
       <input type="hidden" name="form-name" value="reviews">
+      <input type="hidden" name="date" id="review-date">
       <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
       <div class="form-field">
         <label>Your Name</label>
@@ -379,7 +380,7 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
         grid.innerHTML = reviews.map(function(r) {
           return '<div class="testimonial" style="opacity:1;transform:none;">' +
             '<p class="testimonial-text">' + escapeHtml(r.review) + '</p>' +
-            '<span class="testimonial-author">— ' + escapeHtml(r.name) + (r.service ? ' · ' + escapeHtml(r.service) : '') + '</span>' +
+            '<span class="testimonial-author">— ' + escapeHtml(r.name) + (r.service ? ' · ' + escapeHtml(r.service) : '') + (r.date ? ' · ' + escapeHtml(r.date) : '') + '</span>' +
             (r.rating ? '<span style="display:block;font-size:0.85rem;color:#C8924A;margin-top:6px;">' + escapeHtml(r.rating) + '</span>' : '') +
             '</div>';
         }).join('');
@@ -417,6 +418,12 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
+      // Stamp the current date before submitting
+      var dateField = document.getElementById('review-date');
+      if (dateField) {
+        var now = new Date();
+        dateField.value = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
       var data = new FormData(form);
       fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString()
