@@ -394,17 +394,53 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
 
   // After Netlify form submits, intercept to show a thank-you without page reload
   document.addEventListener('DOMContentLoaded', function() {
-    // TT Live Reading form
+    // TT Live Reading form — unified submit + pay
     var ttForm = document.getElementById('tt-love-form');
     if (ttForm) {
       ttForm.addEventListener('submit', function(e) {
         e.preventDefault();
+        var typeField = document.getElementById('tt-reading-type');
+        var summaryText = document.getElementById('tt-summary-text');
+        if (typeField && summaryText) typeField.value = summaryText.textContent || '';
+        var payMethod = document.getElementById('tt-pay-method').value;
+        var amount = currentTTAmount || 0;
+        var payUrl = '';
+        if (payMethod === 'Venmo') payUrl = 'https://venmo.com/code?user_id=2082708108869632501&created=1777945804';
+        else if (payMethod === 'PayPal') payUrl = 'https://www.paypal.me/melissareadstarot/' + amount;
+        else if (payMethod === 'Cash App') payUrl = 'https://cash.app/$ATXnurse80/' + amount;
+        else if (payMethod === 'Square') payUrl = 'https://square.link/u/PJCm8GcP';
         var data = new FormData(ttForm);
         fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(data).toString()
         })
         .then(function() {
-          ttForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Thank you! Your reading request has been received. 🔮</p>';
+          ttForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Your request has been received! Opening your payment app now... 🔮</p>';
+          incrementCounter();
+          if (payUrl) window.open(payUrl, '_blank');
+        })
+        .catch(function() { alert('Something went wrong. Please try again.'); });
+      });
+    }
+
+    // 1:1 Appointment form — unified submit + pay
+    var apptForm = document.getElementById('appt-form');
+    if (apptForm) {
+      apptForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var payMethod = document.getElementById('appt-pay-method').value;
+        var payUrl = '';
+        if (payMethod === 'Venmo') payUrl = 'https://venmo.com/code?user_id=2082708108869632501&created=1777945804';
+        else if (payMethod === 'PayPal') payUrl = 'https://www.paypal.me/melissareadstarot/99';
+        else if (payMethod === 'Cash App') payUrl = 'https://cash.app/$ATXnurse80/99';
+        else if (payMethod === 'Square') payUrl = 'https://square.link/u/PJCm8GcP';
+        var data = new FormData(apptForm);
+        fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data).toString()
+        })
+        .then(function() {
+          apptForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✦ Your booking has been received! Opening your payment app now... 🔮</p>';
+          incrementCounter();
+          if (payUrl) window.open(payUrl, '_blank');
         })
         .catch(function() { alert('Something went wrong. Please try again.'); });
       });
@@ -533,27 +569,42 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
       <span style="font-family:'Cinzel Decorative',serif;font-size:1.6rem;color:var(--gold-light);">$99</span>
     </div>
 
-    <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Step 1 — Complete Payment ($99)</p>
-    <div class="pay-grid">
-      <a href="https://venmo.com/code?user_id=2082708108869632501&created=1777945804" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💙</span>Venmo</a>
-      <a href="https://www.paypal.me/melissareadstarot/99" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🅿️</span>PayPal</a>
-      <a href="https://cash.app/$ATXnurse80/99" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💚</span>Cash App</a>
-      <a href="https://square.link/u/PJCm8GcP" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🟦</span>Square</a>
-    </div>
-    <p style="text-align:center;margin-top:10px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
-
-    <div style="border-top:1px solid rgba(200,146,74,0.2);margin:22px 0 18px;"></div>
-
-    <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Step 2 — Email 3 Available Times</p>
-    <div style="background:rgba(200,146,74,0.06);border:1px solid rgba(200,146,74,0.25);padding:18px 20px;margin-bottom:12px;">
-      <p style="font-size:0.95rem;color:rgba(245,237,216,0.75);line-height:1.7;margin-bottom:14px;">After payment, email Melissa with <strong style="color:var(--cream)">3 dates and times</strong> you are available.</p>
-      <div style="background:rgba(200,146,74,0.15);border:1px solid var(--gold);padding:14px;text-align:center;margin-bottom:16px;border-radius:2px;">
-        <p style="font-size:0.72rem;letter-spacing:0.2em;font-family:'Cinzel',serif;color:var(--gold);margin-bottom:6px;">SEND YOUR EMAIL TO</p>
-        <p style="font-size:1.1rem;color:var(--gold-light);font-weight:bold;word-break:break-all;letter-spacing:0.02em;">MelissaReadsTarot<br>@gmail.com</p>
+    <form name="appointment-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="appt-form">
+      <input type="hidden" name="form-name" value="appointment-booking">
+      <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
+      <div class="form-field">
+        <label>Your Name</label>
+        <input type="text" name="name" placeholder="Your full name" required>
       </div>
-      <a href="mailto:MelissaReadsTarot@gmail.com?subject=1:1%20Tarot%20Session%20Booking&body=Hi%20Melissa!%20I%20just%20completed%20payment%20for%20a%201%3A1%20session.%20Here%20are%203%20times%20I%20am%20available%3A%0A%0A1.%20%0A2.%20%0A3.%20%0A%0ALooking%20forward%20to%20our%20session!" class="btn btn-filled" style="width:100%;text-align:center;display:block;border:none;">📧 Tap Here to Open Email</a>
-    </div>
-    <p class="pay-note">Melissa will confirm your session within 24 hours of receiving your email.</p>
+      <div class="form-field">
+        <label>Your Email</label>
+        <input type="email" name="email" placeholder="So Melissa can confirm your session" required>
+      </div>
+      <div class="form-field">
+        <label>3 Dates &amp; Times You're Available</label>
+        <textarea name="availability" rows="4" placeholder="e.g.&#10;1. Monday Jan 20, 2–4pm CT&#10;2. Wednesday Jan 22, 10am–12pm CT&#10;3. Friday Jan 24, 6–8pm CT" required></textarea>
+      </div>
+      <div class="form-field">
+        <label>Anything you'd like Melissa to know? <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
+        <textarea name="notes" rows="2" placeholder="Topics, intentions, anything on your mind..."></textarea>
+      </div>
+      <input type="hidden" name="payment-method" id="appt-pay-method" value="">
+
+      <div id="appt-pay-section" style="display:none;">
+        <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Choose How to Pay &amp; Submit</p>
+        <p style="font-size:0.82rem;color:rgba(245,237,216,0.5);font-style:italic;margin-bottom:14px;">Clicking a payment button below will submit your booking request <em>and</em> open your payment app for $99. Melissa will confirm your session within 24 hours.</p>
+        <div class="pay-grid" style="margin-bottom:10px;">
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('appt-pay-method').value='Venmo'"><span style="font-size:1.2rem">💙</span>Venmo</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('appt-pay-method').value='PayPal'"><span style="font-size:1.2rem">🅿️</span>PayPal</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('appt-pay-method').value='Cash App'"><span style="font-size:1.2rem">💚</span>Cash App</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('appt-pay-method').value='Square'"><span style="font-size:1.2rem">🟦</span>Square</button>
+        </div>
+        <p style="text-align:center;margin-top:14px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
+        <p class="pay-note" style="margin-top:10px;">Melissa will confirm your session within 24 hours of receiving your booking.</p>
+      </div>
+
+      <button type="button" id="appt-continue-btn" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-top:18px;" onclick="showApptPay()">Continue to Payment →</button>
+    </form>
   </div>
 </div>
 
@@ -565,53 +616,56 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
     <p class="modal-sub">Exclusive readings available only during Melissa's TikTok Live sessions. Lower prices and real-time energy.</p>
 
     <div style="display:grid;gap:10px;margin-bottom:24px;">
-      <div class="pick-option" style="cursor:default;">
+      <div class="pick-option" onclick="selectTTReading(this,'1 Question Live Reading','15')" style="cursor:pointer;">
         <div class="pick-row"><span class="pick-name">⚡ Live Only — 1 Question</span><span class="pick-price">$15</span></div>
         <p class="pick-desc">One focused question answered live. Fast, direct, and energetically charged.</p>
       </div>
-      <div class="pick-option" style="cursor:default;">
+      <div class="pick-option" onclick="selectTTReading(this,'2 Questions Live Reading','25')" style="cursor:pointer;">
         <div class="pick-row"><span class="pick-name">⚡ Live Only — 2 Questions</span><span class="pick-price">$25</span></div>
         <p class="pick-desc">Two questions answered live during the session. Real-time reading with live energy.</p>
       </div>
     </div>
 
-    <div style="background:rgba(200,146,74,0.1);border:1px solid rgba(200,146,74,0.35);padding:18px 20px;text-align:center;margin-bottom:16px;">
-      <p style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.15em;color:var(--gold-light);font-weight:bold;margin-bottom:8px;">AVAILABLE LIVE ON TIKTOK ONLY</p>
-      <p style="font-size:0.95rem;color:rgba(245,237,216,0.7);margin-bottom:14px;">Follow Melissa on TikTok to get notified when she goes live. Payment is made during the live session.</p>
+    <div style="background:rgba(200,146,74,0.1);border:1px solid rgba(200,146,74,0.35);padding:14px 18px;text-align:center;margin-bottom:20px;">
+      <p style="font-size:0.88rem;color:rgba(245,237,216,0.7);margin-bottom:10px;">Follow Melissa on TikTok to get notified when she goes live.</p>
       <a href="https://www.tiktok.com/@melissa_reads_tarot?_r=1&_t=ZT-96DSRbXXIZa" target="_blank" rel="noopener noreferrer" class="btn btn-filled" style="display:inline-block;border:none;">Follow on TikTok ↗</a>
     </div>
 
-    <div class="section-divider">
-      <p class="section-divider-label">Your Reading Details</p>
-      <form name="tt-live-reading" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="tt-love-form">
-        <input type="hidden" name="form-name" value="tt-live-reading">
-        <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
-        <div class="form-field">
-          <label>Your Name</label>
-          <input type="text" name="name" placeholder="Your full name" required>
-        </div>
-        <div class="form-field">
-          <label>Your Question(s)</label>
-          <textarea name="question" rows="3" placeholder="What would you like guidance on during the live? Be as specific as you like..." required></textarea>
-        </div>
-        <div class="form-field">
-          <label>Person Being Asked About <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
-          <input type="text" name="other-person" placeholder="e.g. partner, family member, friend...">
-        </div>
-        <p style="font-size:0.82rem;color:rgba(245,237,216,0.38);font-style:italic;margin-bottom:18px;">Please also include your name and question in your payment note.</p>
-        <button type="submit" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-bottom:18px;">Submit Reading Request</button>
-      </form>
-    </div>
+    <div class="summary-bar" id="tt-reading-summary">Selected: <span id="tt-summary-text"></span></div>
 
-    <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;">Pay During Live</p>
-    <div class="pay-grid">
-      <a href="https://venmo.com/code?user_id=2082708108869632501&created=1777945804" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💙</span>Venmo</a>
-      <a href="https://www.paypal.me/melissareadstarot" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🅿️</span>PayPal</a>
-      <a href="https://cash.app/$ATXnurse80" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💚</span>Cash App</a>
-      <a href="https://square.link/u/PJCm8GcP" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🟦</span>Square</a>
-    </div>
-    <p style="text-align:center;margin-top:12px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
-    <p class="pay-note">These prices are exclusive to live sessions and not available for pre-recorded or private readings.</p>
+    <form name="tt-live-reading" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="tt-love-form">
+      <input type="hidden" name="form-name" value="tt-live-reading">
+      <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
+      <input type="hidden" name="reading-type" id="tt-reading-type" value="">
+      <input type="hidden" name="payment-method" id="tt-pay-method" value="">
+      <div class="form-field">
+        <label>Your Name</label>
+        <input type="text" name="name" placeholder="Your full name" required>
+      </div>
+      <div class="form-field">
+        <label>Your Question(s)</label>
+        <textarea name="question" rows="3" placeholder="What would you like guidance on during the live? Be as specific as you like..." required></textarea>
+      </div>
+      <div class="form-field">
+        <label>Person Being Asked About <span style="opacity:0.45;font-size:0.85em">(optional)</span></label>
+        <input type="text" name="other-person" placeholder="e.g. partner, family member, friend...">
+      </div>
+
+      <div id="tt-pay-section" style="display:none;">
+        <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Choose How to Pay &amp; Submit</p>
+        <p style="font-size:0.82rem;color:rgba(245,237,216,0.5);font-style:italic;margin-bottom:14px;">Clicking a payment button submits your reading request <em>and</em> opens your payment app. Include your name and question in the payment note.</p>
+        <div class="pay-grid" style="margin-bottom:10px;">
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('tt-pay-method').value='Venmo'"><span style="font-size:1.2rem">💙</span>Venmo</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('tt-pay-method').value='PayPal'"><span style="font-size:1.2rem">🅿️</span>PayPal</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('tt-pay-method').value='Cash App'"><span style="font-size:1.2rem">💚</span>Cash App</button>
+          <button type="submit" class="pay-btn" style="border:none;cursor:pointer;" onclick="document.getElementById('tt-pay-method').value='Square'"><span style="font-size:1.2rem">🟦</span>Square</button>
+        </div>
+        <p style="text-align:center;margin-top:14px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
+        <p class="pay-note" style="margin-top:10px;">These prices are exclusive to live sessions and not available for pre-recorded or private readings.</p>
+      </div>
+
+      <button type="button" id="tt-continue-btn" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-top:18px;" onclick="showTTPay()">Continue to Payment →</button>
+    </form>
   </div>
 </div>
 
@@ -713,7 +767,7 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
     <div class="summary-bar" id="reading-summary">Selected: <span id="reading-summary-text"></span></div>
 
     <div class="section-divider">
-      <p class="section-divider-label">Your Reading Details</p>
+      <p class="section-divider-label">Your Details & Payment</p>
       <form name="private-reading" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="reading-form">
         <input type="hidden" name="form-name" value="private-reading">
         <p style="display:none;"><label>Skip: <input name="bot-field"></label></p>
@@ -735,41 +789,124 @@ footer { border-top:1px solid rgba(200,146,74,0.18); padding:52px 48px; text-ali
         </div>
         <input type="hidden" name="reading-type" id="r-reading-type" value="">
         <input type="hidden" name="sos-rush" id="r-sos-hidden" value="No">
-        <p style="font-size:0.82rem;color:rgba(245,237,216,0.38);font-style:italic;margin-bottom:18px;">Please also include your name and question in your payment note.</p>
-        <button type="submit" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-bottom:18px;">Submit Reading Request</button>
-      </form>
-    </div>
 
-    <div class="section-divider">
-      <p class="section-divider-label">Choose Payment Method</p>
-      <div class="pay-grid">
-        <a href="https://venmo.com/code?user_id=2082708108869632501&created=1777945804" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💙</span>Venmo</a>
-        <a id="r-paypal" href="https://www.paypal.me/melissareadstarot" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🅿️</span>PayPal</a>
-        <a id="r-cashapp" href="https://cash.app/$ATXnurse80" target="_blank" class="pay-btn"><span style="font-size:1.2rem">💚</span>Cash App</a>
-        <a href="https://square.link/u/PJCm8GcP" target="_blank" class="pay-btn"><span style="font-size:1.2rem">🟦</span>Square</a>
-      </div>
-      <p class="pay-note">Standard readings delivered within one week. SOS (within 24 hours) adds $20.</p>
-      <p style="text-align:center;margin-top:14px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
+        <!-- Step 2: Pay & Submit — payment buttons appear here, submit happens on click -->
+        <div id="r-pay-section" style="display:none;">
+          <p style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Choose How to Pay & Submit</p>
+          <p style="font-size:0.82rem;color:rgba(245,237,216,0.5);font-style:italic;margin-bottom:14px;">Clicking a payment button below will submit your reading request <em>and</em> open your payment app. Please include your name and question in the payment note.</p>
+          <div class="pay-grid" style="margin-bottom:10px;">
+            <button type="submit" id="r-btn-venmo" class="pay-btn" style="border:none;cursor:pointer;" onclick="setPayMethod('Venmo')"><span style="font-size:1.2rem">💙</span>Venmo</button>
+            <button type="submit" id="r-btn-paypal" class="pay-btn" style="border:none;cursor:pointer;" onclick="setPayMethod('PayPal')"><span style="font-size:1.2rem">🅿️</span>PayPal</button>
+            <button type="submit" id="r-btn-cashapp" class="pay-btn" style="border:none;cursor:pointer;" onclick="setPayMethod('Cash App')"><span style="font-size:1.2rem">💚</span>Cash App</button>
+            <button type="submit" id="r-btn-square" class="pay-btn" style="border:none;cursor:pointer;" onclick="setPayMethod('Square')"><span style="font-size:1.2rem">🟦</span>Square</button>
+          </div>
+          <p style="text-align:center;margin-top:14px;font-size:1.05rem;color:rgba(245,237,216,0.75);">For other payment options visit <a href="https://www.etsy.com/shop/MelissaReadsTarot" target="_blank" rel="noopener noreferrer" style="color:var(--gold-light);font-weight:bold;text-decoration:underline;">my Etsy shop ↗</a></p>
+          <p class="pay-note" style="margin-top:10px;">Standard readings delivered within one week. SOS (within 24 hours) adds $20.</p>
+        </div>
+
+        <!-- Show pay buttons once form fields are filled -->
+        <button type="button" id="r-continue-btn" class="btn btn-filled" style="width:100%;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.2em;margin-top:18px;" onclick="showPaySection()">Continue to Payment →</button>
+
+        <input type="hidden" name="payment-method" id="r-pay-method" value="">
+      </form>
     </div>
   </div>
 </div>
 
 <script>
-// PRIVATE READING FORM — populate hidden fields then submit
+// PRIVATE READING FORM — unified submit + pay flow
+var _pendingPayUrl = '';
+
+var currentTTAmount = 0;
+
+function selectTTReading(el, name, amount) {
+  document.querySelectorAll('#modal-tiktok .pick-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  currentTTAmount = parseInt(amount);
+  document.getElementById('tt-summary-text').textContent = name + ' — $' + amount;
+  document.getElementById('tt-reading-summary').style.display = 'block';
+  // Reset pay section if they change selection
+  var paySection = document.getElementById('tt-pay-section');
+  var continueBtn = document.getElementById('tt-continue-btn');
+  if (paySection) paySection.style.display = 'none';
+  if (continueBtn) continueBtn.style.display = 'block';
+}
+
+function showTTPay() {
+  var name = document.querySelector('#tt-love-form [name="name"]');
+  var question = document.querySelector('#tt-love-form [name="question"]');
+  var summary = document.getElementById('tt-summary-text');
+  if (!summary || !summary.textContent) { alert('Please select a reading type first.'); return; }
+  if (!name || !name.value.trim()) { name.focus(); alert('Please enter your name.'); return; }
+  if (!question || !question.value.trim()) { question.focus(); alert('Please enter your question.'); return; }
+  document.getElementById('tt-pay-section').style.display = 'block';
+  document.getElementById('tt-continue-btn').style.display = 'none';
+  document.getElementById('tt-pay-section').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function showApptPay() {
+  var name = document.querySelector('#appt-form [name="name"]');
+  var email = document.querySelector('#appt-form [name="email"]');
+  var avail = document.querySelector('#appt-form [name="availability"]');
+  if (!name || !name.value.trim()) { name.focus(); alert('Please enter your name.'); return; }
+  if (!email || !email.value.trim()) { email.focus(); alert('Please enter your email.'); return; }
+  if (!avail || !avail.value.trim()) { avail.focus(); alert('Please enter at least one available time.'); return; }
+  document.getElementById('appt-pay-section').style.display = 'block';
+  document.getElementById('appt-continue-btn').style.display = 'none';
+  document.getElementById('appt-pay-section').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function showPaySection() {
+  var name = document.getElementById('r-name');
+  var email = document.getElementById('r-email');
+  var question = document.getElementById('r-question');
+  var readingType = document.getElementById('reading-summary-text');
+
+  if (!readingType || !readingType.textContent) {
+    alert('Please select a reading type first.');
+    return;
+  }
+  if (!name || !name.value.trim()) { name.focus(); alert('Please enter your name.'); return; }
+  if (!email || !email.value.trim()) { email.focus(); alert('Please enter your email.'); return; }
+  if (!question || !question.value.trim()) { question.focus(); alert('Please enter your question.'); return; }
+
+  document.getElementById('r-pay-section').style.display = 'block';
+  document.getElementById('r-continue-btn').style.display = 'none';
+  document.getElementById('r-pay-section').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function setPayMethod(method) {
+  document.getElementById('r-pay-method').value = method;
+}
+
 const readingForm = document.getElementById('reading-form');
 if (readingForm) {
   readingForm.addEventListener('submit', function(e) {
     e.preventDefault();
+
+    // Populate hidden fields
     const summaryText = document.getElementById('reading-summary-text');
     if (summaryText) document.getElementById('r-reading-type').value = summaryText.textContent || '';
     const sos = document.getElementById('sos-checkbox');
     if (sos) document.getElementById('r-sos-hidden').value = sos.checked ? 'Yes — SOS Rush (+$20)' : 'No';
+
+    // Figure out which payment button was clicked and open that app
+    const payMethod = document.getElementById('r-pay-method').value;
+    const total = currentAmount + (sos && sos.checked ? 20 : 0);
+    var payUrl = '';
+    if (payMethod === 'Venmo') payUrl = 'https://venmo.com/code?user_id=2082708108869632501&created=1777945804';
+    else if (payMethod === 'PayPal') payUrl = 'https://www.paypal.me/melissareadstarot/' + total;
+    else if (payMethod === 'Cash App') payUrl = 'https://cash.app/$ATXnurse80/' + total;
+    else if (payMethod === 'Square') payUrl = 'https://square.link/u/PJCm8GcP';
+
     const data = new FormData(readingForm);
     fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(data).toString()
     })
     .then(function() {
-      readingForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✶ Thank you! Your reading request has been received. 🔮</p>';
+      readingForm.innerHTML = '<p style="text-align:center;font-family:\'Cinzel\',serif;font-size:0.95rem;letter-spacing:0.12em;color:var(--gold-light);padding:32px 0;">✶ Your reading request has been received! Opening your payment app now... 🔮</p>';
+      incrementCounter();
+      if (payUrl) window.open(payUrl, '_blank');
     })
     .catch(function() { alert('Something went wrong. Please try again.'); });
   });
@@ -850,6 +987,11 @@ function selectReading(el, name, amount){
   el.classList.add('selected');
   currentAmount = parseInt(amount);
   updateReadingSummary(name);
+  // Reset pay section if they change reading
+  var paySection = document.getElementById('r-pay-section');
+  var continueBtn = document.getElementById('r-continue-btn');
+  if (paySection) paySection.style.display = 'none';
+  if (continueBtn) continueBtn.style.display = 'block';
 }
 function toggleSOS(){
   var selected = document.querySelector('#readings-list .pick-option.selected');
@@ -862,8 +1004,6 @@ function updateReadingSummary(name){
   var label = name + ' — $' + currentAmount + (sos ? ' + $20 SOS = $' + total : '');
   document.getElementById('reading-summary-text').textContent = label;
   document.getElementById('reading-summary').style.display = 'block';
-  document.getElementById('r-paypal').href = 'https://www.paypal.me/melissareadstarot/' + total;
-  document.getElementById('r-cashapp').href = 'https://cash.app/$ATXnurse80/' + total;
 }
 
 // SELECT COURSE
@@ -891,6 +1031,17 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
     <input name="name">
     <input name="question">
     <input name="other-person">
+    <input name="reading-type">
+    <input name="payment-method">
+  </form>
+  <form name="appointment-booking" netlify data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="appointment-booking">
+    <input name="bot-field">
+    <input name="name">
+    <input name="email">
+    <input name="availability">
+    <input name="notes">
+    <input name="payment-method">
   </form>
   <form name="private-reading" netlify data-netlify="true" netlify-honeypot="bot-field">
     <input type="hidden" name="form-name" value="private-reading">
@@ -901,6 +1052,7 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
     <input name="other-person">
     <input name="reading-type">
     <input name="sos-rush">
+    <input name="payment-method">
   </form>
 </div>
 
